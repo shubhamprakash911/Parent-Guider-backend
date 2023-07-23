@@ -30,6 +30,6 @@ requests==2.31.0
 tqdm==4.65.0
 urllib3==2.0.3
 virtualenv==20.23.1
-Werkzeug==2.3.6
+Werkzeug==2.2.3
 yarg==0.1.9
 yarl==1.9.2
