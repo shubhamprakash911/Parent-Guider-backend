@@ -27,6 +27,6 @@ def authentication(view_function):
             return jsonify({"message": "Token has expired, Login again."}), 401
         except jwt.InvalidTokenError:
             # The token is invalid or malformed.
-            return jsonify({"message": "Invalid token, Please login again"}), 401
+            return jsonify({"message": "Invalid token, Please Login first"}), 401
 
     return wrapper
