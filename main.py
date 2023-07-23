@@ -6,8 +6,10 @@ from dotenv import load_dotenv
 import bcrypt
 import jwt
 from flask_cors import CORS
-from configs.connection import get_db_connection
+
+# from configs.connection import get_db_connection
 from middleware.authentication import authentication
+from pymongo import MongoClient
 
 
 # Load environment variables from the .env file
@@ -15,6 +17,11 @@ load_dotenv()
 
 app = Flask(__name__)
 CORS(app)  # This will enable CORS for your entire app
+
+
+mongoUrl = os.environ.get("mongoUrl")
+client = MongoClient(mongoUrl)
+db = client["parent-guider"]
 
 
 @app.route("/")
@@ -30,8 +37,10 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 def history():
     email = request.json["email"]
     # Connect to the MongoDB database
-    db = get_db_connection()
-    histories_collection = db.histories
+    # db = get_db_connection()
+    # histories_collection = db.histories
+    histories_collection = db["histories"]
+
     history = histories_collection.find_one({"email": email})
 
     if history:
@@ -59,10 +68,11 @@ def login():
     password = data.get("password")
 
     # Connect to the MongoDB database
-    db = get_db_connection()
+    # db = get_db_connection()
 
     # Get the "users" collection
-    users_collection = db.users
+    # users_collection = db.users
+    users_collection = db["users"]
 
     # Find the user with the given email in the "users" collection
     user = users_collection.find_one({"email": email})
@@ -89,10 +99,11 @@ def register():
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
     # Connect to the MongoDB database
-    db = get_db_connection()
+    # db = get_db_connection()
 
     # Get the "users" collection
-    users_collection = db.users
+    # users_collection = db.users
+    users_collection = db["users"]
 
     # Check if the email already exists in the "users" collection
     if users_collection.find_one({"email": email}):

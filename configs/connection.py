@@ -5,6 +5,7 @@ from pymongo import MongoClient
 
 load_dotenv()
 
+
 def get_db_connection():
     mongo_uri = os.getenv("mongoURL")
     client = MongoClient(mongo_uri)
