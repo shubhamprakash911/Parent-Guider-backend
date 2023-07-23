@@ -149,10 +149,11 @@ def gpt4(decoded_code):
 
     histories = {"email": email, "histories": user_input}
     # Connect to the MongoDB database
-    db = get_db_connection()
+    # db = get_db_connection()
 
     # Get the "histories" collection
-    histories_collection = db.histories
+    # histories_collection = db.histories
+    histories_collection = db["histories"]
     histories_collection.delete_one({"email": email})
     histories_collection.insert_one(histories)
 
