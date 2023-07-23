@@ -26,47 +26,6 @@ def index():
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
-@app.route("/gpt4", methods=["POST"])
-@authentication
-def gpt4(decoded_code):
-    data = request.json
-    user_input = data["user_input"]
-    email = data["email"]
-    messages = [
-        {
-            "role": "assistant",
-            "content": "You are a male parenting influencer with expertise in solving various parenting challenges. Your goal is to answer user questions in the same language they use and respond with a human-like tone, replicating the user's style. Ask clarifying questions to parents if needed.",
-        },
-    ]
-
-    messages.extend(user_input)
-
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo", messages=messages, temperature=0.8, max_tokens=150
-        )
-        content = response.choices[0].message["content"]
-    except RateLimitError:
-        content = "The server is experiencing a high volume of requests. Please try again later."
-
-    # insert latest response to user input
-    user_input.append({"role": "assistant", "content": content})
-
-    histories = {"email": email, "histories": user_input}
-    # Connect to the MongoDB database
-    db = get_db_connection()
-
-    # Get the "histories" collection
-    histories_collection = db.histories
-    histories_collection.delete_one({"email": email})
-    histories_collection.insert_one(histories)
-
-    return jsonify(content=content)
-
-
-# chatbot end
-
-
 @app.route("/history", methods=["POST"])
 def history():
     email = request.json["email"]
@@ -149,6 +108,47 @@ def register():
     users_collection.insert_one(user_data)
 
     return jsonify({"message": f"Registration successful for email: {email}"})
+
+
+@app.route("/gpt4", methods=["POST"])
+@authentication
+def gpt4(decoded_code):
+    data = request.json
+    user_input = data["user_input"]
+    email = data["email"]
+    messages = [
+        {
+            "role": "assistant",
+            "content": "You are a male parenting influencer with expertise in solving various parenting challenges. Your goal is to answer user questions in the same language they use and respond with a human-like tone, replicating the user's style. Ask clarifying questions to parents if needed.",
+        },
+    ]
+
+    messages.extend(user_input)
+
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo", messages=messages, temperature=0.8, max_tokens=150
+        )
+        content = response.choices[0].message["content"]
+    except RateLimitError:
+        content = "The server is experiencing a high volume of requests. Please try again later."
+
+    # insert latest response to user input
+    user_input.append({"role": "assistant", "content": content})
+
+    histories = {"email": email, "histories": user_input}
+    # Connect to the MongoDB database
+    db = get_db_connection()
+
+    # Get the "histories" collection
+    histories_collection = db.histories
+    histories_collection.delete_one({"email": email})
+    histories_collection.insert_one(histories)
+
+    return jsonify(content=content)
+
+
+# chatbot end
 
 
 if __name__ == "__main__":
